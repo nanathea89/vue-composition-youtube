@@ -1,16 +1,22 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
+import Dashboard from "../layouts/Dashboard.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   linkActiveClass:'active',
   routes: [
     {
-      path: "/",
-      name: "home",
-      component: HomeView,
+      path: "/login",
+      name: "login",
+      component: ()=> import('../views/LoginView.vue')
     },
     {
+      path: "/",
+      name: "dashboard",
+      component: Dashboard,
+      children: [
+ {
       path: "/about",
       name: "about",
       // route level code-splitting
@@ -36,7 +42,10 @@ const router = createRouter({
     {
       path: "/computed",
       name: "computed",
-      component: () => import('../views/ComputedView.vue')
+      component: () => import('../views/ComputedView.vue'),
+      beforeEnter: () =>{
+        console.log('cek sebelum masuk ')
+      }
     },
     {
       path: "/watcheffect",
@@ -47,8 +56,34 @@ const router = createRouter({
       path: "/lifecyclehook",
       name: "lifecyclehook",
       component: () => import('../views/LifeCycleView.vue')
+    },
+    {
+      path: "/suspense",
+      name: "suspense",
+      component: () => import('../views/SuspenseView.vue')
     }
+      ]
+    },
+   
   ],
 });
+
+router.beforeEach((to, from, next) => {
+  // console.log(to, from)
+  const isAuth = JSON.parse(localStorage.getItem('isAuth'))
+  if(to.name != 'login' && !isAuth){
+    next({name: 'login'})
+  }else  if(to.name == 'login' && isAuth){
+    next({name: 'home'})
+  }else{
+
+    next()
+  }
+  // if(to.name =='logout' && isAuth){
+  //   console.log('logout')
+  //   localStorage.removeItem('isAuth')
+  //   next({name: to.name})
+  // }
+})
 
 export default router;
